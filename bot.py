@@ -10,8 +10,8 @@ load_dotenv()
 # Configuration
 TOKEN = os.getenv("DISCORD_TOKEN")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-OWNER = "matjdadiu"
-REPO = "LeadWorkshop"
+OWNER = ""
+REPO = ""
 
 # Channel IDs
 ISSUES_CHANNEL_ID =
@@ -175,4 +175,5 @@ async def clear_tracking(ctx):
     await ctx.send("🗑️ Cleared all tracking data!")
 
 if __name__ == "__main__":
+
     bot.run(TOKEN)
