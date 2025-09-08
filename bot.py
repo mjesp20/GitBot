@@ -5,18 +5,67 @@ import requests
 import json
 from dotenv import load_dotenv
 
+# New imports
+import threading
+import pystray
+from PIL import Image, ImageDraw
+import win32gui
+import win32con
+
+# Store console window handle
+CONSOLE_HWND = win32gui.GetForegroundWindow()
+
+def hide_console():
+    """Hide the console window."""
+    win32gui.ShowWindow(CONSOLE_HWND, win32con.SW_HIDE)
+
+def show_console():
+    """Show the console window again."""
+    win32gui.ShowWindow(CONSOLE_HWND, win32con.SW_SHOW)
+
+
+def create_image():
+    """Create a simple icon for tray."""
+    img = Image.new('RGB', (64, 64), (40, 40, 40))
+    d = ImageDraw.Draw(img)
+    d.rectangle((16, 16, 48, 48), fill=(114, 137, 218))  # Discord-like purple
+    return img
+
+def setup_tray(bot_thread):
+    def on_quit(icon, item):
+        print("Shutting down bot...")
+        os._exit(0)  # Force exit entire script
+
+    def on_hide(icon, item):
+        hide_console()
+
+    def on_show(icon, item):
+        show_console()
+
+    icon = pystray.Icon("discord_bot")
+    icon.icon = create_image()
+    icon.title = "Discord Bot"
+    icon.menu = pystray.Menu(
+        pystray.MenuItem("Hide Console", on_hide),
+        pystray.MenuItem("Show Console", on_show),
+        pystray.MenuItem("Quit", on_quit)
+    )
+
+    icon.run()
+
+
 load_dotenv()
 
 # Configuration
 TOKEN = os.getenv("DISCORD_TOKEN")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-OWNER = ""
-REPO = ""
+OWNER =
+REPO = 
 
 # Channel IDs
-ISSUES_CHANNEL_ID =
+ISSUES_CHANNEL_ID = 
 PRS_CHANNEL_ID = 
-BUILD_CHANNEL_ID= #todo
+BUILD_CHANNEL_ID= # todo maybe just do webhook?
 
 # Storage file
 STORAGE_FILE = "github_tracking.json"
@@ -175,5 +224,15 @@ async def clear_tracking(ctx):
     await ctx.send("🗑️ Cleared all tracking data!")
 
 if __name__ == "__main__":
+    # Start bot in background thread
+    def run_bot():
+        bot.run(TOKEN)
 
-    bot.run(TOKEN)
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
+    bot_thread.start()
+
+    # (Optional) hide console automatically at start
+    hide_console()
+
+    # Start tray
+    setup_tray(bot_thread)
